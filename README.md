@@ -2,10 +2,7 @@
 
 > Your Claude Code assistant, now with an Indian accent.
 
-![bahut accha!](image.jpeg)
-
-[![Demo — click to watch with sound](https://img.shields.io/badge/▶_Demo-YouTube-red?style=flat-square)](https://youtube.com)
-<!-- Replace the URL above with your actual YouTube link once you have it. -->
+<p align="center"><img src="image.jpeg" width="600" alt="bahut accha!"></p>
 
 ---
 
