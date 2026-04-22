@@ -22,10 +22,13 @@ echo "  ✓ /sahib slash command removed"
 if [[ -f "$SETTINGS" ]] && command -v jq &>/dev/null; then
   echo "Removing hooks from $SETTINGS..."
   jq '
-    .hooks |= with_entries(
-      .value |= map(select(
+    .hooks |= (
+      to_entries |
+      map(.value |= map(select(
         (.hooks // [] | map(.command) | any(contains("play.sh"))) | not
-      )) | select(length > 0)
+      ))) |
+      map(select(.value | length > 0)) |
+      from_entries
     )
   ' "$SETTINGS" > "$SETTINGS.tmp" && mv "$SETTINGS.tmp" "$SETTINGS"
   echo "  ✓ sahib hooks removed"
