@@ -22,22 +22,30 @@ Hooks into Claude Code's event system to play a random voice line whenever somet
 ```bash
 git clone https://github.com/antonshpak/claude-code-sahib
 cd claude-code-sahib
-bash install.sh
+bash setup.sh
 ```
 
-Requires `jq` for hook wiring (`brew install jq` / `apt install jq`). The installer copies the MP3s, installs `play.sh`, and patches your `~/.claude/settings.json` — idempotent, safe to re-run.
+Requires `jq` for hook wiring (`brew install jq` / `apt install jq`). Idempotent, safe to re-run.
 
 **Windows (PowerShell)**
 
 ```powershell
 git clone https://github.com/antonshpak/claude-code-sahib
 cd claude-code-sahib
-powershell -ExecutionPolicy Bypass -File install.ps1
+powershell -ExecutionPolicy Bypass -File setup.ps1
 ```
 
 Uses `%APPDATA%\Claude\settings.json`. Plays audio via the system's default MP3 handler.
 
 Restart Claude Code after installation.
+
+**Uninstall**
+
+```bash
+bash setup.sh --uninstall
+# or on Windows:
+powershell -ExecutionPolicy Bypass -File setup.ps1 -Uninstall
+```
 
 ### Toggling the voice
 
