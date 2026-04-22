@@ -29,23 +29,30 @@
 
 ## Quick start
 
-**Option A — install prebuilt audio**
+**Install a character** (macOS / Linux, requires `jq` — `brew install jq`):
 
 ```bash
 git clone https://github.com/dalamber/claude-code-sahib
 cd claude-code-sahib
-python scripts/install_character.py --character sahib --language en
+bash setup.sh                                            # sahib/en (default)
+bash setup.sh --character butler --language en
+bash setup.sh --character gopnik --language ru           # prompts on content warning
+bash setup.sh --uninstall
 ```
 
-This copies MP3s into `~/.claude/sounds/active/` and merges the character's `spinnerVerbs` into `~/.claude/settings.json` (with a timestamped backup). **Hook wiring is coming in the next release** — until then, use the legacy Sahib installer if you want the event-driven voice lines:
+**Windows** (PowerShell):
 
-```bash
-bash setup.sh                                # macOS / Linux (requires jq)
-# or on Windows:
+```powershell
+git clone https://github.com/dalamber/claude-code-sahib
+cd claude-code-sahib
 powershell -ExecutionPolicy Bypass -File setup.ps1
+powershell -ExecutionPolicy Bypass -File setup.ps1 -Character butler -Language en
+powershell -ExecutionPolicy Bypass -File setup.ps1 -Uninstall
 ```
 
-**Option B — generate your own audio**
+`setup.sh` / `setup.ps1` copies the character's MP3s into `~/.claude/sounds/active/`, merges `spinnerVerbs` into `~/.claude/settings.json` (with a timestamped backup), wires Claude Code hooks to `play.sh` / `play.ps1`, and installs a `sahib` shell alias + `/sahib` slash command. To switch characters, just run `setup.sh` again with different args — the sound folder is wiped and rewritten.
+
+**Generate your own audio**
 
 Free, no account (Edge TTS):
 
@@ -66,13 +73,13 @@ Both scripts write to `characters/<id>/<lang>/sounds/<category>/<category>_NN.mp
 
 ## Toggling the voice
 
-The legacy Sahib `setup.sh` installs a `sahib` shell alias:
-
 ```bash
 sahib        # toggle
 sahib off    # silence
 sahib on     # back on
 ```
+
+Works across all characters — the flag file lives at `~/.claude/sounds/active/.disabled`.
 
 ## Adding phrases, languages, or new characters
 

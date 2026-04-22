@@ -1,14 +1,27 @@
 #!/usr/bin/env bash
 # claude-code-sahib setup — macOS / Linux
-# Usage: bash setup.sh [--install|--uninstall]   (default: --install)
+# Installs a character's sounds, spinnerVerbs, and Claude Code hooks.
+#
+# Usage:
+#   bash setup.sh                                      # sahib/en (default)
+#   bash setup.sh --character butler --language en
+#   bash setup.sh -c gopnik -l ru
+#   bash setup.sh --uninstall
 set -euo pipefail
 
 ACTION="install"
-for arg in "$@"; do
-  case "$arg" in
-    --uninstall) ACTION="uninstall" ;;
-    --install)   ACTION="install"   ;;
-    *) echo "Usage: $0 [--install|--uninstall]"; exit 1 ;;
+CHAR="sahib"
+LANG=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --uninstall)      ACTION="uninstall"; shift ;;
+    --install)        ACTION="install";   shift ;;
+    --character|-c)   CHAR="$2";          shift 2 ;;
+    --language|-l)    LANG="$2";          shift 2 ;;
+    -h|--help)
+      sed -n '2,8p' "$0" | sed 's/^# *//'; exit 0 ;;
+    *) echo "Unknown arg: $1"; echo "Run: $0 --help"; exit 1 ;;
   esac
 done
 
@@ -19,35 +32,79 @@ SETTINGS="$CLAUDE/settings.json"
 PLAY="$CLAUDE/sounds/play.sh"
 TOGGLE="$CLAUDE/sounds/toggle.sh"
 
+need_jq() {
+  if ! command -v jq &>/dev/null; then
+    echo "ERROR: jq required for JSON wiring."
+    echo "  macOS:   brew install jq"
+    echo "  Debian:  sudo apt install jq"
+    echo "  Fedora:  sudo dnf install jq"
+    exit 1
+  fi
+}
+
 # ── Install ───────────────────────────────────────────────────────────────────
 do_install() {
-  echo "=== claude-code-sahib: install ==="
+  need_jq
 
+  CHAR_JSON="$REPO/characters/$CHAR/character.json"
+  if [[ ! -f "$CHAR_JSON" ]]; then
+    echo "ERROR: unknown character '$CHAR'. Available:"
+    ls -1 "$REPO/characters" | sed 's/^/  /'
+    exit 1
+  fi
+
+  if [[ -z "$LANG" ]]; then
+    LANG="$(jq -r '.default_language' "$CHAR_JSON")"
+  fi
+  LANG_DIR="$REPO/characters/$CHAR/$LANG"
+  if [[ ! -d "$LANG_DIR" ]]; then
+    echo "ERROR: language '$LANG' not available for '$CHAR'. Have:"
+    jq -r '.languages[] | "  " + .' "$CHAR_JSON"
+    exit 1
+  fi
+
+  WARN="$(jq -r '.content_warning // empty' "$CHAR_JSON")"
+  if [[ -n "$WARN" ]]; then
+    echo ""
+    echo "CONTENT WARNING: $WARN"
+    read -r -p "Proceed? [y/N]: " ans
+    [[ "$ans" =~ ^[Yy]$ ]] || { echo "Aborted."; exit 0; }
+  fi
+
+  echo "=== claude-code-sahib: install $CHAR ($LANG) ==="
+
+  # --- Sounds ---------------------------------------------------------------
   echo ""
   echo "Copying sounds → $SOUNDS"
+  rm -rf "$SOUNDS"
   mkdir -p "$SOUNDS"
-  cp -r "$REPO/characters/sahib/en/sounds/"* "$SOUNDS/"
+  cp -r "$LANG_DIR/sounds/"* "$SOUNDS/" 2>/dev/null || true
+  find "$SOUNDS" -name '.gitkeep' -delete 2>/dev/null || true
   count=$(find "$SOUNDS" -name '*.mp3' | wc -l | tr -d ' ')
   echo "  ✓ $count MP3 files"
+  if [[ "$count" == "0" ]]; then
+    echo "  ! No MP3s found for $CHAR/$LANG."
+    echo "    Generate with: python scripts/generate_elevenlabs.py --character $CHAR --language $LANG"
+  fi
 
   echo "Installing scripts → $CLAUDE/sounds/"
   cp "$REPO/scripts/play.sh"   "$PLAY"   && chmod +x "$PLAY"
   cp "$REPO/scripts/toggle.sh" "$TOGGLE" && chmod +x "$TOGGLE"
   echo "  ✓ play.sh, toggle.sh"
 
-  echo "Wiring Claude Code hooks → $SETTINGS"
-  if ! command -v jq &>/dev/null; then
-    echo ""
-    echo "  jq not found — cannot auto-wire hooks."
-    echo "  Install jq and re-run, or add hooks manually (see README)."
-    echo "    macOS:   brew install jq"
-    echo "    Debian:  sudo apt install jq"
-    echo "    Fedora:  sudo dnf install jq"
-    exit 1
-  fi
-
+  # --- Settings: backup, spinnerVerbs, hooks -------------------------------
+  echo "Wiring settings → $SETTINGS"
   mkdir -p "$CLAUDE"
   [[ ! -f "$SETTINGS" ]] && echo '{}' > "$SETTINGS"
+  cp "$SETTINGS" "$SETTINGS.backup.$(date +%s)"
+
+  VERBS_JSON="$LANG_DIR/spinner-verbs.json"
+  if [[ -f "$VERBS_JSON" ]]; then
+    jq --slurpfile v "$VERBS_JSON" '.spinnerVerbs = $v[0].spinnerVerbs' \
+      "$SETTINGS" > "$SETTINGS.tmp" && mv "$SETTINGS.tmp" "$SETTINGS"
+    echo "  ✓ spinnerVerbs"
+  fi
+
   jq 'if .hooks == null then . + {"hooks": {}} else . end' \
     "$SETTINGS" > "$SETTINGS.tmp" && mv "$SETTINGS.tmp" "$SETTINGS"
 
@@ -74,7 +131,7 @@ do_install() {
   add_hook "Notification"     "bash ~/.claude/sounds/play.sh waiting & cat > /dev/null"
 
   SHELL_RC=""
-  if [[ "$SHELL" == */zsh ]];   then SHELL_RC="$HOME/.zshrc"
+  if   [[ "$SHELL" == */zsh  ]]; then SHELL_RC="$HOME/.zshrc"
   elif [[ "$SHELL" == */bash ]]; then SHELL_RC="$HOME/.bashrc"
   fi
   if [[ -n "$SHELL_RC" ]]; then
@@ -91,7 +148,7 @@ do_install() {
   echo "  + /sahib slash command"
 
   echo ""
-  echo "All done, sir. Restart Claude Code to hear Aditya."
+  echo "Installed $CHAR ($LANG). Restart Claude Code to apply."
   echo ""
   echo "  sahib / sahib on / sahib off   — toggle the voice"
   echo "  /sahib                         — same from inside Claude Code"
@@ -111,21 +168,20 @@ do_uninstall() {
   echo "  ✓ /sahib slash command removed"
 
   if [[ -f "$SETTINGS" ]] && command -v jq &>/dev/null; then
-    echo "Removing hooks from $SETTINGS..."
+    echo "Removing hooks and spinnerVerbs from $SETTINGS..."
     jq '
-      .hooks |= (
+      (.hooks |= (
         to_entries |
         map(.value |= map(select(
           (.hooks // [] | map(.command) | any(contains("play.sh"))) | not
         ))) |
         map(select(.value | length > 0)) |
         from_entries
-      )
+      )) | del(.spinnerVerbs)
     ' "$SETTINGS" > "$SETTINGS.tmp" && mv "$SETTINGS.tmp" "$SETTINGS"
-    echo "  ✓ sahib hooks removed"
+    echo "  ✓ hooks and spinnerVerbs removed"
   else
-    echo "  ! Skipping hooks cleanup (jq not found or settings.json missing)"
-    echo "    Remove entries containing 'play.sh' from $SETTINGS manually"
+    echo "  ! Skipping settings cleanup (jq or settings.json missing)"
   fi
 
   for RC in "$HOME/.zshrc" "$HOME/.bashrc"; do
@@ -137,7 +193,7 @@ do_uninstall() {
   done
 
   echo ""
-  echo "Uninstalled. Restart Claude Code to apply hook changes."
+  echo "Uninstalled. Restart Claude Code."
 }
 
 case "$ACTION" in

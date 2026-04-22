@@ -1,10 +1,15 @@
 # claude-code-sahib setup - Windows (PowerShell)
-# Usage: powershell -ExecutionPolicy Bypass -File setup.ps1 [-Uninstall]
+# Installs a character's sounds, spinnerVerbs, and Claude Code hooks.
 #
-# Claude Code on Windows reads config from %USERPROFILE%\.claude
-# (same as ~/.claude on macOS/Linux).
+# Usage:
+#   powershell -ExecutionPolicy Bypass -File setup.ps1
+#   powershell -ExecutionPolicy Bypass -File setup.ps1 -Character butler -Language en
+#   powershell -ExecutionPolicy Bypass -File setup.ps1 -Character gopnik -Language ru
+#   powershell -ExecutionPolicy Bypass -File setup.ps1 -Uninstall
 
 param(
+    [string]$Character = "sahib",
+    [string]$Language  = "",
     [switch]$Uninstall
 )
 
@@ -17,38 +22,96 @@ $Settings  = Join-Path $ClaudeDir "settings.json"
 $PlayPs1   = Join-Path $ClaudeDir "sounds\play.ps1"
 $TogglePs1 = Join-Path $ClaudeDir "sounds\toggle.ps1"
 
-# --- Install ----------------------------------------------------------------
-function Invoke-Install {
-    Write-Host "=== claude-code-sahib: install ===" -ForegroundColor Cyan
+function Read-Settings {
+    if (-not (Test-Path $Settings)) { return [PSCustomObject]@{} }
+    $raw = Get-Content $Settings -Raw
+    if ([string]::IsNullOrWhiteSpace($raw)) { return [PSCustomObject]@{} }
+    try { return $raw | ConvertFrom-Json } catch {
+        Write-Host "  ! settings.json is not valid JSON, starting fresh" -ForegroundColor Yellow
+        return [PSCustomObject]@{}
+    }
+}
 
+function Write-Settings($cfg) {
+    $cfg | ConvertTo-Json -Depth 20 | Set-Content $Settings -Encoding UTF8
+}
+
+function Invoke-Install {
+    $charJson = Join-Path $Repo "characters\$Character\character.json"
+    if (-not (Test-Path $charJson)) {
+        Write-Host "ERROR: unknown character '$Character'. Available:" -ForegroundColor Red
+        Get-ChildItem (Join-Path $Repo "characters") -Directory | ForEach-Object { "  $($_.Name)" }
+        exit 1
+    }
+    $char = Get-Content $charJson -Raw | ConvertFrom-Json
+
+    if ([string]::IsNullOrEmpty($Language)) {
+        $Language = $char.default_language
+    }
+    $langDir = Join-Path $Repo "characters\$Character\$Language"
+    if (-not (Test-Path $langDir)) {
+        Write-Host "ERROR: language '$Language' not available for '$Character'. Have:" -ForegroundColor Red
+        $char.languages | ForEach-Object { "  $_" }
+        exit 1
+    }
+
+    if ($char.content_warning) {
+        Write-Host ""
+        Write-Host "CONTENT WARNING: $($char.content_warning)" -ForegroundColor Yellow
+        $ans = Read-Host "Proceed? [y/N]"
+        if ($ans -notmatch "^[Yy]") { Write-Host "Aborted."; exit 0 }
+    }
+
+    Write-Host "=== claude-code-sahib: install $Character ($Language) ===" -ForegroundColor Cyan
+
+    # --- Sounds ---
     Write-Host ""
     Write-Host "Copying sounds -> $Sounds"
+    if (Test-Path $Sounds) { Remove-Item -Recurse -Force $Sounds }
     New-Item -ItemType Directory -Force -Path $Sounds | Out-Null
-    Copy-Item -Recurse -Force "$Repo\characters\sahib\en\sounds\*" $Sounds
-    $count = (Get-ChildItem $Sounds -Recurse -Filter "*.mp3").Count
+    $srcSounds = Join-Path $langDir "sounds"
+    if (Test-Path $srcSounds) {
+        Copy-Item -Recurse -Force "$srcSounds\*" $Sounds
+        Get-ChildItem -Path $Sounds -Recurse -Filter ".gitkeep" -Force | Remove-Item -Force
+    }
+    $count = (Get-ChildItem $Sounds -Recurse -Filter "*.mp3" -ErrorAction SilentlyContinue).Count
     Write-Host "  [ok] $count MP3 files" -ForegroundColor Green
+    if ($count -eq 0) {
+        Write-Host "  ! No MP3s for $Character/$Language. Generate with:" -ForegroundColor Yellow
+        Write-Host "    python scripts\generate_elevenlabs.py --character $Character --language $Language"
+    }
 
     Write-Host "Installing scripts -> $(Split-Path $PlayPs1 -Parent)"
     Copy-Item -Force "$Repo\scripts\play.ps1"   $PlayPs1
     Copy-Item -Force "$Repo\scripts\toggle.ps1" $TogglePs1
     Write-Host "  [ok] play.ps1, toggle.ps1" -ForegroundColor Green
 
-    Write-Host "Wiring Claude Code hooks -> $Settings"
+    # --- Settings: backup, spinnerVerbs, hooks ---
+    Write-Host "Wiring settings -> $Settings"
     New-Item -ItemType Directory -Force -Path $ClaudeDir | Out-Null
     if (-not (Test-Path $Settings)) { '{}' | Set-Content $Settings -Encoding UTF8 }
+    $backup = "$Settings.backup.$([int][double]::Parse((Get-Date -UFormat %s)))"
+    Copy-Item -Force $Settings $backup
+    Write-Host "  [ok] backup -> $backup"
 
-    try {
-        $raw = Get-Content $Settings -Raw
-        $cfg = if ([string]::IsNullOrWhiteSpace($raw)) { [PSCustomObject]@{} } else { $raw | ConvertFrom-Json }
-    } catch {
-        Write-Host "  ! settings.json is not valid JSON, starting fresh" -ForegroundColor Yellow
-        $cfg = [PSCustomObject]@{}
+    $cfg = Read-Settings
+
+    $verbsJson = Join-Path $langDir "spinner-verbs.json"
+    if (Test-Path $verbsJson) {
+        $verbs = (Get-Content $verbsJson -Raw | ConvertFrom-Json).spinnerVerbs
+        if ($cfg.PSObject.Properties.Match("spinnerVerbs")) {
+            $cfg.spinnerVerbs = $verbs
+        } else {
+            $cfg | Add-Member -NotePropertyName spinnerVerbs -NotePropertyValue $verbs
+        }
+        Write-Host "  [ok] spinnerVerbs" -ForegroundColor Green
     }
+
     if (-not $cfg.hooks) {
         $cfg | Add-Member -NotePropertyName hooks -NotePropertyValue ([PSCustomObject]@{})
     }
 
-    function Add-SahibHook([string]$Event, [string]$Command) {
+    function Add-VoiceHook([string]$Event, [string]$Command) {
         $existing = $cfg.hooks.$Event
         if ($existing) {
             $already = $existing | ForEach-Object { $_.hooks } |
@@ -67,20 +130,18 @@ function Invoke-Install {
     }
 
     $ps = "powershell -NoProfile -WindowStyle Hidden -File `"$PlayPs1`""
+    Add-VoiceHook "SessionStart"     "$ps start"
+    Add-VoiceHook "UserPromptSubmit" "$ps acknowledge"
+    Add-VoiceHook "PreToolUse"       "$ps working -Chance 3"
+    Add-VoiceHook "Stop"             "$ps done"
+    Add-VoiceHook "Notification"     "$ps waiting"
 
-    Add-SahibHook "SessionStart"     "$ps start"
-    Add-SahibHook "UserPromptSubmit" "$ps acknowledge"
-    # -Chance 3 = 1-in-3 throttle, matching setup.sh's RANDOM % 3 gate.
-    Add-SahibHook "PreToolUse"       "$ps working -Chance 3"
-    Add-SahibHook "Stop"             "$ps done"
-    Add-SahibHook "Notification"     "$ps waiting"
-
-    $cfg | ConvertTo-Json -Depth 10 | Set-Content $Settings -Encoding UTF8
+    Write-Settings $cfg
 
     $CommandsDir = Join-Path $ClaudeDir "commands"
     New-Item -ItemType Directory -Force -Path $CommandsDir | Out-Null
     $sahibCmd = @"
-Toggle Indian voice hooks on or off.
+Toggle voice hooks on or off.
 
 !powershell -ExecutionPolicy Bypass -File "$TogglePs1" `$ARGUMENTS
 "@
@@ -98,13 +159,12 @@ Toggle Indian voice hooks on or off.
     }
 
     Write-Host ""
-    Write-Host "All done, sir. Restart Claude Code to hear Aditya." -ForegroundColor Cyan
+    Write-Host "Installed $Character ($Language). Restart Claude Code to apply." -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  sahib / sahib on / sahib off   - toggle the voice"
     Write-Host "  /sahib                         - same from inside Claude Code"
 }
 
-# --- Uninstall --------------------------------------------------------------
 function Invoke-Uninstall {
     Write-Host "=== claude-code-sahib: uninstall ===" -ForegroundColor Cyan
 
@@ -120,17 +180,9 @@ function Invoke-Uninstall {
     Write-Host "  [ok] /sahib slash command removed" -ForegroundColor Green
 
     if (Test-Path $Settings) {
-        Write-Host "Removing hooks from $Settings..."
-        try {
-            $raw = Get-Content $Settings -Raw
-            $cfg = if ([string]::IsNullOrWhiteSpace($raw)) { [PSCustomObject]@{} } else { $raw | ConvertFrom-Json }
-        } catch {
-            Write-Host "  ! settings.json is not valid JSON, skipping hook cleanup" -ForegroundColor Yellow
-            $cfg = $null
-        }
+        Write-Host "Removing hooks and spinnerVerbs from $Settings..."
+        $cfg = Read-Settings
         if ($cfg -and $cfg.hooks) {
-            # Rebuild hooks from scratch to avoid the fragile `$cfg.hooks.$name = ...`
-            # assignment pattern that errors on some PS 5.1 configurations.
             $newHooks = [PSCustomObject]@{}
             foreach ($prop in $cfg.hooks.PSObject.Properties) {
                 $filtered = @($prop.Value | Where-Object {
@@ -141,9 +193,12 @@ function Invoke-Uninstall {
                 }
             }
             $cfg.hooks = $newHooks
-            $cfg | ConvertTo-Json -Depth 10 | Set-Content $Settings -Encoding UTF8
-            Write-Host "  [ok] sahib hooks removed" -ForegroundColor Green
         }
+        if ($cfg -and $cfg.PSObject.Properties.Match("spinnerVerbs")) {
+            $cfg.PSObject.Properties.Remove("spinnerVerbs")
+        }
+        Write-Settings $cfg
+        Write-Host "  [ok] hooks and spinnerVerbs removed" -ForegroundColor Green
     }
 
     $profilePath = $PROFILE.CurrentUserAllHosts
@@ -157,8 +212,7 @@ function Invoke-Uninstall {
     }
 
     Write-Host ""
-    Write-Host "Uninstalled. Restart Claude Code to apply hook changes." -ForegroundColor Cyan
+    Write-Host "Uninstalled. Restart Claude Code." -ForegroundColor Cyan
 }
 
-# --- Entry point ------------------------------------------------------------
 if ($Uninstall) { Invoke-Uninstall } else { Invoke-Install }
