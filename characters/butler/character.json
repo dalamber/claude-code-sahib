@@ -13,14 +13,14 @@
   "voice_suggestions": {
     "en": {
       "provider": "elevenlabs",
-      "voice_id": "PLACEHOLDER_EN_BUTLER",
+      "voice_id": "fjnwTZkKtQOJaYzGLa6n",
       "stability": 0.7,
       "similarity_boost": 0.75,
       "style": 0.3
     },
     "ru": {
       "provider": "elevenlabs",
-      "voice_id": "PLACEHOLDER_RU_BUTLER",
+      "voice_id": "6sFKzaJr574YWVu4UuJF",
       "stability": 0.7,
       "similarity_boost": 0.75,
       "style": 0.3
