@@ -4,6 +4,14 @@
 
 <p align="center"><img src="image.jpeg" width="600" alt="bahut accha!"></p>
 
+<p align="center">
+  <a href="https://youtu.be/fn8WFHgQC0E">
+    <img src="https://img.youtube.com/vi/fn8WFHgQC0E/maxresdefault.jpg" width="600" alt="Watch the demo on YouTube">
+  </a>
+  <br>
+  <sub><a href="https://youtu.be/fn8WFHgQC0E">▶ Watch the demo</a></sub>
+</p>
+
 ---
 
 **A note on tone.** This is an affectionate parody built with love for the Indian developer community, which has shaped so much of the software we all use every day. The phrases ("sahib", "bahut accha", "kindly review") are a warm stylisation, not a caricature. If anything here lands wrong for you, please open an issue — feedback genuinely welcome.
@@ -34,7 +42,7 @@ cd claude-code-sahib
 powershell -ExecutionPolicy Bypass -File setup.ps1
 ```
 
-Uses `%APPDATA%\Claude\settings.json`. Plays audio via the system's default MP3 handler.
+Uses `%USERPROFILE%\.claude\settings.json`. Plays audio silently via WPF's `System.Windows.Media.MediaPlayer` — no media-player window pops up.
 
 Restart Claude Code after installation.
 
