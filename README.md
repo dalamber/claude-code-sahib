@@ -90,10 +90,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). TL;DR: fork, drop a folder under `charac
 | Character | Language | Voice |
 |---|---|---|
 | sahib | en | ElevenLabs — [Aditya Rao, "Motivated, Clear and Smooth"](https://elevenlabs.io/app/voice-library?voiceId=HAbWfLBk6HVxg0scLcvE) |
-| butler | en | TBD |
-| butler | ru | TBD |
-| gopnik | ru | TBD |
-| govnokoder | ru | TBD |
+| butler | en | ElevenLabs — [voice `fjnwTZkKtQOJaYzGLa6n`](https://elevenlabs.io/app/voice-library?voiceId=fjnwTZkKtQOJaYzGLa6n) |
+| butler | ru | ElevenLabs — [voice `6sFKzaJr574YWVu4UuJF`](https://elevenlabs.io/app/voice-library?voiceId=6sFKzaJr574YWVu4UuJF) |
+| gopnik | ru | ElevenLabs — [voice `qxjGnozOAtD4eqNuXms4`](https://elevenlabs.io/app/voice-library?voiceId=qxjGnozOAtD4eqNuXms4) |
+| govnokoder | ru | ElevenLabs — [voice `NYC9WEgkq1u4jiqBseQ9`](https://elevenlabs.io/app/voice-library?voiceId=NYC9WEgkq1u4jiqBseQ9) |
 
 Edge TTS fallback voices: `en-IN-PrabhatNeural`, `ru-RU-DmitryNeural`.
 
