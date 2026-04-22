@@ -77,6 +77,12 @@ Add-Hook "Notification"     "$ps waiting"
 
 $cfg | ConvertTo-Json -Depth 10 | Set-Content $Settings -Encoding UTF8
 
+# ── /sahib slash command ──────────────────────────────────────────────────────
+$CommandsDir = Join-Path $ClaudeDir "commands"
+New-Item -ItemType Directory -Force -Path $CommandsDir | Out-Null
+Copy-Item -Force "$Repo\commands\sahib.md" (Join-Path $CommandsDir "sahib.md")
+Write-Host "  + /sahib slash command → $CommandsDir\sahib.md" -ForegroundColor Green
+
 # ── PowerShell profile alias ──────────────────────────────────────────────────
 $profilePath = $PROFILE.CurrentUserAllHosts
 $aliasLine   = "function sahib { & `"$TogglePs1`" @args }"
@@ -95,3 +101,4 @@ Write-Host "Toggle the voice anytime (reload your profile or open new terminal f
 Write-Host "  sahib        # toggle on/off"
 Write-Host "  sahib off    # silence"
 Write-Host "  sahib on     # back in business"
+Write-Host "  /sahib       # same, as a Claude Code slash command"

@@ -85,10 +85,17 @@ if [[ -n "$SHELL_RC" ]]; then
   fi
 fi
 
+# ── /sahib slash command ──────────────────────────────────────────────────────
+COMMANDS_DIR="$CLAUDE/commands"
+mkdir -p "$COMMANDS_DIR"
+cp "$REPO/commands/sahib.md" "$COMMANDS_DIR/sahib.md"
+echo "  + /sahib slash command → $COMMANDS_DIR/sahib.md"
+
 echo ""
 echo "All done, sir. Restart Claude Code to hear Aditya."
 echo ""
 echo "Toggle the voice anytime:"
-echo "  sahib        # toggle on/off"
+echo "  sahib        # shell alias: toggle on/off"
 echo "  sahib off    # silence"
 echo "  sahib on     # back in business"
+echo "  /sahib       # same, as a Claude Code slash command"
