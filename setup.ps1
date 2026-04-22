@@ -1,4 +1,4 @@
-# claude-code-sahib setup — Windows (PowerShell)
+# claude-code-sahib setup - Windows (PowerShell)
 # Usage: powershell -ExecutionPolicy Bypass -File setup.ps1 [-Uninstall]
 #
 # Claude Code settings path: %APPDATA%\Claude\settings.json
@@ -76,7 +76,7 @@ function Invoke-Install {
     Write-Host "  + /sahib slash command" -ForegroundColor Green
 
     $profilePath = $PROFILE.CurrentUserAllHosts
-    $aliasLine   = "function sahib { & `"$TogglePs1`" @args }"
+    $aliasLine   = 'function sahib { & "' + $TogglePs1 + '" @args }'
     if (-not (Test-Path $profilePath)) { New-Item -Force -Path $profilePath | Out-Null }
     if (Select-String -Path $profilePath -Pattern "toggle.ps1" -Quiet) {
         Write-Host "  ~ sahib function already in profile, skipping"
@@ -88,8 +88,8 @@ function Invoke-Install {
     Write-Host ""
     Write-Host "All done, sir. Restart Claude Code to hear Aditya." -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "  sahib / sahib on / sahib off   — toggle the voice"
-    Write-Host "  /sahib                         — same from inside Claude Code"
+    Write-Host "  sahib / sahib on / sahib off   - toggle the voice"
+    Write-Host "  /sahib                         - same from inside Claude Code"
 }
 
 # ── Uninstall ─────────────────────────────────────────────────────────────────
