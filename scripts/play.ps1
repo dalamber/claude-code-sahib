@@ -1,7 +1,7 @@
-# Play a random MP3 from the given category. Non-blocking.
-param(
-    [Parameter(Mandatory)][string]$Category
-)
+param([Parameter(Mandatory)][string]$Category)
+
+$flag = Join-Path $env:USERPROFILE ".claude\sounds\indian\.disabled"
+if (Test-Path $flag) { exit 0 }
 
 $dir = Join-Path $env:USERPROFILE ".claude\sounds\indian\$Category"
 $files = Get-ChildItem -Path $dir -Filter "*.mp3" -ErrorAction SilentlyContinue

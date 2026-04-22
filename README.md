@@ -39,6 +39,18 @@ Uses `%APPDATA%\Claude\settings.json`. Plays audio via the system's default MP3 
 
 Restart Claude Code after installation.
 
+### Toggling the voice
+
+The installer adds a `sahib` command to your shell:
+
+```bash
+sahib        # toggle on/off
+sahib off    # silence — going silent, boss
+sahib on     # back in business
+```
+
+Works by dropping a `.disabled` flag file that `play.sh` checks before playing. No settings.json edits, no restart needed.
+
 ## Generating your own phrases
 
 **Option A — Free (Microsoft Edge TTS)**

@@ -7,6 +7,7 @@ CLAUDE="$HOME/.claude"
 SOUNDS="$CLAUDE/sounds/indian"
 SETTINGS="$CLAUDE/settings.json"
 PLAY="$CLAUDE/sounds/play.sh"
+TOGGLE="$CLAUDE/sounds/toggle.sh"
 
 echo "=== claude-code-sahib installer ==="
 
@@ -18,11 +19,11 @@ cp -r "$REPO/sounds/"* "$SOUNDS/"
 count=$(find "$SOUNDS" -name '*.mp3' | wc -l | tr -d ' ')
 echo "  ✓ $count MP3 files"
 
-# ── play.sh ──────────────────────────────────────────────────────────────────
-echo "Installing play.sh → $PLAY"
-cp "$REPO/scripts/play.sh" "$PLAY"
-chmod +x "$PLAY"
-echo "  ✓ done"
+# ── play.sh / toggle.sh ──────────────────────────────────────────────────────
+echo "Installing scripts → $CLAUDE/sounds/"
+cp "$REPO/scripts/play.sh"   "$PLAY"   && chmod +x "$PLAY"
+cp "$REPO/scripts/toggle.sh" "$TOGGLE" && chmod +x "$TOGGLE"
+echo "  ✓ play.sh, toggle.sh"
 
 # ── Hooks ────────────────────────────────────────────────────────────────────
 echo "Wiring Claude Code hooks → $SETTINGS"
@@ -66,5 +67,28 @@ add_hook "PreToolUse"       '[ $((RANDOM % 3)) -eq 0 ] && bash ~/.claude/sounds/
 add_hook "Stop"             "bash ~/.claude/sounds/play.sh done & cat > /dev/null"
 add_hook "Notification"     "bash ~/.claude/sounds/play.sh waiting & cat > /dev/null"
 
+# ── Shell alias ───────────────────────────────────────────────────────────────
+ALIAS_LINE='alias sahib="bash ~/.claude/sounds/toggle.sh"'
+SHELL_RC=""
+if [[ "$SHELL" == */zsh ]];  then SHELL_RC="$HOME/.zshrc"
+elif [[ "$SHELL" == */bash ]]; then SHELL_RC="$HOME/.bashrc"
+fi
+
+if [[ -n "$SHELL_RC" ]]; then
+  if grep -q 'toggle.sh' "$SHELL_RC" 2>/dev/null; then
+    echo "  ~ sahib alias already in $SHELL_RC, skipping"
+  else
+    echo "" >> "$SHELL_RC"
+    echo "# claude-code-sahib toggle" >> "$SHELL_RC"
+    echo "$ALIAS_LINE" >> "$SHELL_RC"
+    echo "  + sahib alias → $SHELL_RC (run 'source $SHELL_RC' or open a new terminal)"
+  fi
+fi
+
 echo ""
 echo "All done, sir. Restart Claude Code to hear Aditya."
+echo ""
+echo "Toggle the voice anytime:"
+echo "  sahib        # toggle on/off"
+echo "  sahib off    # silence"
+echo "  sahib on     # back in business"
