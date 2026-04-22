@@ -2,7 +2,8 @@
 
 > Your Claude Code assistant, now with an Indian accent.
 
-![demo gif coming soon]
+[![Demo — click to watch with sound](https://img.shields.io/badge/▶_Demo-YouTube-red?style=flat-square)](https://youtube.com)
+<!-- Replace the URL above with your actual YouTube link once you have it. -->
 
 ---
 
@@ -14,7 +15,31 @@
 
 Hooks into Claude Code's event system to play a random voice line whenever something happens: session starts, a tool runs, Claude finishes, or the session goes idle. The voice is Indian English — warm, slightly formal, occasionally delightful. Every "done sir" deserves to be heard.
 
-## Quick start
+## Installation
+
+**macOS / Linux**
+
+```bash
+git clone https://github.com/antonshpak/claude-code-sahib
+cd claude-code-sahib
+bash install.sh
+```
+
+Requires `jq` for hook wiring (`brew install jq` / `apt install jq`). The installer copies the MP3s, installs `play.sh`, and patches your `~/.claude/settings.json` — idempotent, safe to re-run.
+
+**Windows (PowerShell)**
+
+```powershell
+git clone https://github.com/antonshpak/claude-code-sahib
+cd claude-code-sahib
+powershell -ExecutionPolicy Bypass -File install.ps1
+```
+
+Uses `%APPDATA%\Claude\settings.json`. Plays audio via the system's default MP3 handler.
+
+Restart Claude Code after installation.
+
+## Generating your own phrases
 
 **Option A — Free (Microsoft Edge TTS)**
 
@@ -32,20 +57,14 @@ Requires a Starter+ subscription. The included MP3s were generated with [Aditya 
 ```bash
 pip install requests
 export ELEVENLABS_API_KEY=your_key_here
-export ELEVENLABS_VOICE_ID=HAbWfLBk6HVxg0scLcvE  # or any other voice ID
+export ELEVENLABS_VOICE_ID=HAbWfLBk6HVxg0scLcvE  # or any voice ID from the library
 
 python scripts/generate.py --backend elevenlabs
-# or pass voice ID directly:
-python scripts/generate.py --backend elevenlabs --voice-id HAbWfLBk6HVxg0scLcvE
 ```
 
 **Option C — Just use the MP3s**
 
-Clone the repo and skip generation entirely. The `sounds/` directory has all 26 phrases ready to go.
-
-## Hooks setup
-
-Coming in next version. For now, see `examples/settings.json.example`.
+Clone and skip generation. The `sounds/` directory has all 26 phrases ready to go.
 
 ## Phrase catalog
 
@@ -78,20 +97,20 @@ Coming in next version. For now, see `examples/settings.json.example`.
 | `waiting` | 2 | I am still waiting boss |
 | `waiting` | 3 | Hello sir, any update |
 
-## Generating your own
+## Tuning the voice
 
-Add phrases to the `PHRASES` dict in `scripts/generate.py`, then run with `--force` to regenerate:
+Add or change phrases in the `PHRASES` dict in `scripts/generate.py`, then regenerate:
 
 ```bash
 python scripts/generate.py --category done --force
 ```
 
-For ElevenLabs, tune the voice in the `EL_VOICE_SETTINGS` block at the top of the script:
+For ElevenLabs, tune the feel in `EL_VOICE_SETTINGS` at the top of the script:
 
 ```python
 EL_VOICE_SETTINGS = {
-    "stability": 0.5,        # 0–1: lower = more expressive
-    "similarity_boost": 0.75, # 0–1: how closely to match the original voice
+    "stability": 0.5,         # 0–1: lower = more expressive
+    "similarity_boost": 0.75, # 0–1: voice fidelity
     "style": 0.4,             # 0–1: higher = more stylised
     "use_speaker_boost": True,
 }
