@@ -1,0 +1,31 @@
+{
+  "id": "butler",
+  "name": {
+    "en": "Butler",
+    "ru": "Дворецкий"
+  },
+  "description": {
+    "en": "Refined, understated, dignified. Jeeves energy.",
+    "ru": "Аристократичный, сдержанный, из старых денег"
+  },
+  "languages": ["en", "ru"],
+  "default_language": "en",
+  "voice_suggestions": {
+    "en": {
+      "provider": "elevenlabs",
+      "voice_id": "PLACEHOLDER_EN_BUTLER",
+      "stability": 0.7,
+      "similarity_boost": 0.75,
+      "style": 0.3
+    },
+    "ru": {
+      "provider": "elevenlabs",
+      "voice_id": "PLACEHOLDER_RU_BUTLER",
+      "stability": 0.7,
+      "similarity_boost": 0.75,
+      "style": 0.3
+    }
+  },
+  "categories": ["start", "acknowledge", "working", "done", "error", "waiting"],
+  "content_warning": null
+}

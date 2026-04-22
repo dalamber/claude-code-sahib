@@ -1,0 +1,22 @@
+{
+  "id": "gopnik",
+  "name": {
+    "ru": "Гопник"
+  },
+  "description": {
+    "ru": "Уличный, на кортах, по понятиям. Братан с района."
+  },
+  "languages": ["ru"],
+  "default_language": "ru",
+  "voice_suggestions": {
+    "ru": {
+      "provider": "elevenlabs",
+      "voice_id": "PLACEHOLDER_RU_GOPNIK",
+      "stability": 0.7,
+      "similarity_boost": 0.75,
+      "style": 0.3
+    }
+  },
+  "categories": ["start", "acknowledge", "working", "done", "error", "waiting"],
+  "content_warning": "Contains Russian street slang and profanity. Affectionate archetype parody."
+}

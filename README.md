@@ -1,6 +1,6 @@
 # claude-code-sahib
 
-> Your Claude Code assistant, now with an Indian accent.
+> A collection of voice characters for Claude Code. Bahut accha, sir.
 
 <p align="center"><img src="image.jpeg" width="600" alt="bahut accha!"></p>
 
@@ -14,145 +14,81 @@
 
 ---
 
-**A note on tone.** This is an affectionate parody built with love for the Indian developer community, which has shaped so much of the software we all use every day. The phrases ("sahib", "bahut accha", "kindly review") are a warm stylisation, not a caricature. If anything here lands wrong for you, please open an issue — feedback genuinely welcome.
+**A note on tone.** This project started as an affectionate parody of Indian-English corporate politeness (the Sahib character) and has grown into an umbrella for character voices — aristocratic butler, Russian street kid, burnt-out developer. Some characters contain profanity and harsh humor; that's the aesthetic of those specific archetypes, not the project's overall register. If a character crosses a line for you, open an issue. Any character with strong language is flagged with a `content_warning` and the installer asks before proceeding.
 
 ---
 
-## What it does
+## Characters
 
-Hooks into Claude Code's event system to play a random voice line whenever something happens: session starts, a tool runs, Claude finishes, or the session goes idle. The voice is Indian English — warm, slightly formal, occasionally delightful. Every "done sir" deserves to be heard.
+| ID | Name | Languages | Vibe | Content warning |
+|---|---|---|---|---|
+| `sahib` | Sahib | en | Warm, formal, "doing the needful" Indian-English assistant | — |
+| `butler` | Butler / Дворецкий | en, ru | Refined, understated Jeeves energy | — |
+| `gopnik` | Гопник | ru | Russian street-kid archetype, "по понятиям" | ✓ profanity |
+| `govnokoder` | Говнокодер | ru | Cynical burnt-out developer, dark engineering humor | ✓ profanity |
 
-## Installation
+## Quick start
 
-**macOS / Linux**
+**Option A — install prebuilt audio**
 
 ```bash
 git clone https://github.com/dalamber/claude-code-sahib
 cd claude-code-sahib
-bash setup.sh
+python scripts/install_character.py --character sahib --language en
 ```
 
-Requires `jq` for hook wiring (`brew install jq` / `apt install jq`). Idempotent, safe to re-run.
+This copies MP3s into `~/.claude/sounds/active/` and merges the character's `spinnerVerbs` into `~/.claude/settings.json` (with a timestamped backup). **Hook wiring is coming in the next release** — until then, use the legacy Sahib installer if you want the event-driven voice lines:
 
-**Windows (PowerShell)**
-
-```powershell
-git clone https://github.com/dalamber/claude-code-sahib
-cd claude-code-sahib
+```bash
+bash setup.sh                                # macOS / Linux (requires jq)
+# or on Windows:
 powershell -ExecutionPolicy Bypass -File setup.ps1
 ```
 
-Uses `%USERPROFILE%\.claude\settings.json`. Plays audio silently via WPF's `System.Windows.Media.MediaPlayer` — no media-player window pops up.
+**Option B — generate your own audio**
 
-Restart Claude Code after installation.
-
-**Uninstall**
-
-```bash
-bash setup.sh --uninstall
-# or on Windows:
-powershell -ExecutionPolicy Bypass -File setup.ps1 -Uninstall
-```
-
-### Toggling the voice
-
-The installer adds a `sahib` command to your shell:
-
-```bash
-sahib        # toggle on/off
-sahib off    # silence — going silent, boss
-sahib on     # back in business
-```
-
-Works by dropping a `.disabled` flag file that `play.sh` checks before playing. No settings.json edits, no restart needed.
-
-## Generating your own phrases
-
-**Option A — Free (Microsoft Edge TTS)**
+Free, no account (Edge TTS):
 
 ```bash
 pip install edge-tts
-python scripts/generate.py
+python scripts/generate_edge_tts.py --character butler --language en
 ```
 
-Uses `en-IN-PrabhatNeural`. No account needed.
-
-**Option B — Premium (ElevenLabs)**
-
-Requires a Starter+ subscription. The included MP3s were generated with [Aditya Rao — Motivated, Clear and Smooth](https://elevenlabs.io/app/voice-library?voiceId=HAbWfLBk6HVxg0scLcvE).
+ElevenLabs (requires a Starter+ subscription — edit `characters/<id>/character.json` with a real `voice_id` first):
 
 ```bash
 pip install requests
 export ELEVENLABS_API_KEY=your_key_here
-export ELEVENLABS_VOICE_ID=HAbWfLBk6HVxg0scLcvE  # or any voice ID from the library
-
-python scripts/generate.py --backend elevenlabs
+python scripts/generate_elevenlabs.py --character butler --language en
 ```
 
-**Option C — Just use the MP3s**
+Both scripts write to `characters/<id>/<lang>/sounds/<category>/<category>_NN.mp3` and are idempotent; use `--force` to regenerate, `--category done` to target one category.
 
-Clone and skip generation. The `sounds/` directory has all 26 phrases ready to go.
+## Toggling the voice
 
-## Phrase catalog
-
-| Category | # | Phrase |
-|----------|---|--------|
-| `start` | 1 | Good morning sir, ready to write some code |
-| `start` | 2 | Welcome back boss, let us begin |
-| `start` | 3 | Namaste sir, I am at your service |
-| `acknowledge` | 1 | Okay sir, one moment please |
-| `acknowledge` | 2 | Yes boss, let me see |
-| `acknowledge` | 3 | Right away sir |
-| `acknowledge` | 4 | Understood, most excellent request |
-| `working` | 1 | Working on it sir |
-| `working` | 2 | Doing the needful |
-| `working` | 3 | One second boss, processing |
-| `working` | 4 | Let me check this for you |
-| `done` | 1 | Done sir |
-| `done` | 2 | Task completed, very good |
-| `done` | 3 | Finished boss, most excellent |
-| `done` | 4 | Bahut accha, all done |
-| `done` | 5 | Everything is working, sir |
-| `done` | 6 | Please sir, kindly review |
-| `done` | 7 | I am done, what next boss |
-| `done` | 8 | Absolutely magnificent, finished |
-| `error` | 1 | Oh no sir, something went wrong |
-| `error` | 2 | Sorry boss, there is a problem |
-| `error` | 3 | Apologies sir, shall we try again |
-| `error` | 4 | Hai Ram, this is not working |
-| `waiting` | 1 | Sir, are you still there |
-| `waiting` | 2 | I am still waiting boss |
-| `waiting` | 3 | Hello sir, any update |
-
-## Tuning the voice
-
-Add or change phrases in the `PHRASES` dict in `scripts/generate.py`, then regenerate:
+The legacy Sahib `setup.sh` installs a `sahib` shell alias:
 
 ```bash
-python scripts/generate.py --category done --force
+sahib        # toggle
+sahib off    # silence
+sahib on     # back on
 ```
 
-For ElevenLabs, tune the feel in `EL_VOICE_SETTINGS` at the top of the script:
+## Adding phrases, languages, or new characters
 
-```python
-EL_VOICE_SETTINGS = {
-    "stability": 0.5,         # 0–1: lower = more expressive
-    "similarity_boost": 0.75, # 0–1: voice fidelity
-    "style": 0.4,             # 0–1: higher = more stylised
-    "use_speaker_boost": True,
-}
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md). TL;DR: fork, drop a folder under `characters/`, keep the tone affectionate, open a PR.
 
 ## Voice credits
 
-| Backend | Voice |
-|---------|-------|
-| Microsoft Edge TTS | [`en-IN-PrabhatNeural`](https://azure.microsoft.com/en-us/products/ai-services/text-to-speech) |
-| ElevenLabs | [Aditya Rao — Motivated, Clear and Smooth](https://elevenlabs.io/app/voice-library?voiceId=HAbWfLBk6HVxg0scLcvE) |
+| Character | Language | Voice |
+|---|---|---|
+| sahib | en | ElevenLabs — [Aditya Rao, "Motivated, Clear and Smooth"](https://elevenlabs.io/app/voice-library?voiceId=HAbWfLBk6HVxg0scLcvE) |
+| butler | en | TBD |
+| butler | ru | TBD |
+| gopnik | ru | TBD |
+| govnokoder | ru | TBD |
 
-## Contributing
-
-PRs welcome, especially new phrases and new categories. Please keep the same warm-and-silly tone — think affectionate parody, not mockery. New voices are welcome too.
+Edge TTS fallback voices: `en-IN-PrabhatNeural`, `ru-RU-DmitryNeural`.
 
 ## License
 

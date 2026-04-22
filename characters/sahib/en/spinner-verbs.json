@@ -1,6 +1,4 @@
 {
-  "_comment": "Example settings produced by scripts/install_character.py (Sahib, en).",
-  "_hooks_todo": "Hook wiring coming in next release. Will trigger category-specific sounds on Claude Code events.",
   "spinnerVerbs": {
     "mode": "replace",
     "verbs": [

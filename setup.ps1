@@ -12,7 +12,7 @@ $ErrorActionPreference = "Stop"
 
 $Repo      = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ClaudeDir = Join-Path $env:USERPROFILE ".claude"
-$Sounds    = Join-Path $ClaudeDir "sounds\indian"
+$Sounds    = Join-Path $ClaudeDir "sounds\active"
 $Settings  = Join-Path $ClaudeDir "settings.json"
 $PlayPs1   = Join-Path $ClaudeDir "sounds\play.ps1"
 $TogglePs1 = Join-Path $ClaudeDir "sounds\toggle.ps1"
@@ -24,7 +24,7 @@ function Invoke-Install {
     Write-Host ""
     Write-Host "Copying sounds -> $Sounds"
     New-Item -ItemType Directory -Force -Path $Sounds | Out-Null
-    Copy-Item -Recurse -Force "$Repo\sounds\*" $Sounds
+    Copy-Item -Recurse -Force "$Repo\characters\sahib\en\sounds\*" $Sounds
     $count = (Get-ChildItem $Sounds -Recurse -Filter "*.mp3").Count
     Write-Host "  [ok] $count MP3 files" -ForegroundColor Green
 
@@ -111,6 +111,7 @@ function Invoke-Uninstall {
     Write-Host ""
     Write-Host "Removing sounds and scripts..."
     Remove-Item -Recurse -Force $Sounds     -ErrorAction SilentlyContinue
+    Remove-Item -Recurse -Force (Join-Path $ClaudeDir "sounds\indian") -ErrorAction SilentlyContinue
     Remove-Item -Force $PlayPs1             -ErrorAction SilentlyContinue
     Remove-Item -Force $TogglePs1           -ErrorAction SilentlyContinue
     Write-Host "  [ok] sounds and scripts removed" -ForegroundColor Green

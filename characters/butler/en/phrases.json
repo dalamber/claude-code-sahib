@@ -1,0 +1,40 @@
+{
+  "start": [
+    "Good day, sir. I am at your service.",
+    "Welcome back, sir. Shall we commence?",
+    "I trust you are well, sir."
+  ],
+  "acknowledge": [
+    "Very good, sir.",
+    "Quite so, sir. One moment.",
+    "If I may, sir, right away.",
+    "As you wish, sir."
+  ],
+  "working": [
+    "Attending to it now, sir.",
+    "Looking into the matter, sir.",
+    "Shan't be a moment, sir.",
+    "Taking the liberty, sir."
+  ],
+  "done": [
+    "The task is complete, sir.",
+    "Done, sir. I trust it is to your satisfaction.",
+    "Finished, sir. Shall I fetch anything further?",
+    "Consider it handled, sir.",
+    "Most satisfactorily accomplished, sir.",
+    "It is done, sir.",
+    "Your request has been attended to.",
+    "Complete, sir. A small triumph."
+  ],
+  "error": [
+    "Terribly sorry, sir. An unfortunate complication.",
+    "My sincere apologies, sir. The matter requires another attempt.",
+    "Regrettably, sir, something has gone amiss.",
+    "Dreadful, sir. Shall we try again?"
+  ],
+  "waiting": [
+    "I await your instruction, sir.",
+    "Still here, sir. At your leisure.",
+    "Whenever you are ready, sir."
+  ]
+}

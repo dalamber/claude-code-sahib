@@ -1,0 +1,40 @@
+{
+  "start": [
+    "Good morning sir, ready to write some code",
+    "Welcome back boss, let us begin",
+    "Namaste sir, I am at your service"
+  ],
+  "acknowledge": [
+    "Okay sir, one moment please",
+    "Yes boss, let me see",
+    "Right away sir",
+    "Understood, most excellent request"
+  ],
+  "working": [
+    "Working on it sir",
+    "Doing the needful",
+    "One second boss, processing",
+    "Let me check this for you"
+  ],
+  "done": [
+    "Done sir",
+    "Task completed, very good",
+    "Finished boss, most excellent",
+    "Bahut accha, all done",
+    "Everything is working, sir",
+    "Please sir, kindly review",
+    "I am done, what next boss",
+    "Absolutely magnificent, finished"
+  ],
+  "error": [
+    "Oh no sir, something went wrong",
+    "Sorry boss, there is a problem",
+    "Apologies sir, shall we try again",
+    "Hai Ram, this is not working"
+  ],
+  "waiting": [
+    "Sir, are you still there",
+    "I am still waiting boss",
+    "Hello sir, any update"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "sahib",
+  "name": {
+    "en": "Sahib"
+  },
+  "description": {
+    "en": "Warm, formal, slightly theatrical Indian-English assistant. Bahut accha energy."
+  },
+  "languages": ["en"],
+  "default_language": "en",
+  "voice_suggestions": {
+    "en": {
+      "provider": "elevenlabs",
+      "voice_id": "HAbWfLBk6HVxg0scLcvE",
+      "stability": 0.5,
+      "similarity_boost": 0.75,
+      "style": 0.4
+    }
+  },
+  "categories": ["start", "acknowledge", "working", "done", "error", "waiting"],
+  "content_warning": null
+}

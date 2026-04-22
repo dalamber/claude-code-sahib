@@ -14,7 +14,7 @@ done
 
 REPO="$(cd "$(dirname "$0")" && pwd)"
 CLAUDE="$HOME/.claude"
-SOUNDS="$CLAUDE/sounds/indian"
+SOUNDS="$CLAUDE/sounds/active"
 SETTINGS="$CLAUDE/settings.json"
 PLAY="$CLAUDE/sounds/play.sh"
 TOGGLE="$CLAUDE/sounds/toggle.sh"
@@ -26,7 +26,7 @@ do_install() {
   echo ""
   echo "Copying sounds → $SOUNDS"
   mkdir -p "$SOUNDS"
-  cp -r "$REPO/sounds/"* "$SOUNDS/"
+  cp -r "$REPO/characters/sahib/en/sounds/"* "$SOUNDS/"
   count=$(find "$SOUNDS" -name '*.mp3' | wc -l | tr -d ' ')
   echo "  ✓ $count MP3 files"
 
@@ -103,7 +103,7 @@ do_uninstall() {
 
   echo ""
   echo "Removing sounds and scripts..."
-  rm -rf "$CLAUDE/sounds/indian"
+  rm -rf "$CLAUDE/sounds/active" "$CLAUDE/sounds/indian"
   rm -f  "$PLAY" "$TOGGLE"
   echo "  ✓ sounds and scripts removed"
 

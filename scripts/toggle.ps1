@@ -1,7 +1,7 @@
 # Usage: toggle.ps1 [on|off]   (no args = toggle)
 param([string]$Action = "")
 
-$flag = Join-Path $env:USERPROFILE ".claude\sounds\indian\.disabled"
+$flag = Join-Path $env:USERPROFILE ".claude\sounds\active\.disabled"
 
 $resolved = if ($Action -ne "") { $Action } `
             elseif (Test-Path $flag) { "on" } `
