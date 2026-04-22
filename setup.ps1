@@ -23,18 +23,18 @@ function Invoke-Install {
     Write-Host "=== claude-code-sahib: install ===" -ForegroundColor Cyan
 
     Write-Host ""
-    Write-Host "Copying sounds → $Sounds"
+    Write-Host "Copying sounds -> $Sounds"
     New-Item -ItemType Directory -Force -Path $Sounds | Out-Null
     Copy-Item -Recurse -Force "$Repo\sounds\*" $Sounds
     $count = (Get-ChildItem $Sounds -Recurse -Filter "*.mp3").Count
     Write-Host "  ✓ $count MP3 files" -ForegroundColor Green
 
-    Write-Host "Installing scripts → $(Split-Path $PlayPs1 -Parent)"
+    Write-Host "Installing scripts -> $(Split-Path $PlayPs1 -Parent)"
     Copy-Item -Force "$Repo\scripts\play.ps1"   $PlayPs1
     Copy-Item -Force "$Repo\scripts\toggle.ps1" $TogglePs1
     Write-Host "  ✓ play.ps1, toggle.ps1" -ForegroundColor Green
 
-    Write-Host "Wiring Claude Code hooks → $Settings"
+    Write-Host "Wiring Claude Code hooks -> $Settings"
     New-Item -ItemType Directory -Force -Path $ClaudeDir | Out-Null
     if (-not (Test-Path $Settings)) { '{}' | Set-Content $Settings -Encoding UTF8 }
 
@@ -82,7 +82,7 @@ function Invoke-Install {
         Write-Host "  ~ sahib function already in profile, skipping"
     } else {
         Add-Content $profilePath "`n# claude-code-sahib toggle`n$aliasLine"
-        Write-Host "  + sahib function → $profilePath" -ForegroundColor Green
+        Write-Host "  + sahib function -> $profilePath" -ForegroundColor Green
     }
 
     Write-Host ""
