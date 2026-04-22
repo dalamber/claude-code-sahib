@@ -146,7 +146,7 @@ function Invoke-Install {
     $verbsJson = Join-Path $langDir "spinner-verbs.json"
     if (Test-Path $verbsJson) {
         $verbs = (Get-Content $verbsJson -Raw | ConvertFrom-Json).spinnerVerbs
-        if ($cfg.PSObject.Properties.Match("spinnerVerbs")) {
+        if ($cfg.PSObject.Properties.Match("spinnerVerbs").Count -gt 0) {
             $cfg.spinnerVerbs = $verbs
         } else {
             $cfg | Add-Member -NotePropertyName spinnerVerbs -NotePropertyValue $verbs
