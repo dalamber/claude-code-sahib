@@ -8,7 +8,7 @@
 #   powershell -ExecutionPolicy Bypass -File setup.ps1 -Uninstall
 
 param(
-    [string]$Character = "sahib",
+    [string]$Character = "",
     [string]$Language  = "",
     [switch]$Uninstall
 )
@@ -36,7 +36,46 @@ function Write-Settings($cfg) {
     $cfg | ConvertTo-Json -Depth 20 | Set-Content $Settings -Encoding UTF8
 }
 
+function Select-Character {
+    Write-Host ""
+    Write-Host "Available characters:"
+    $dirs = Get-ChildItem (Join-Path $Repo "characters") -Directory | Sort-Object Name
+    $items = @()
+    for ($i = 0; $i -lt $dirs.Count; $i++) {
+        $cj = Get-Content (Join-Path $dirs[$i].FullName "character.json") -Raw | ConvertFrom-Json
+        $name = ($cj.name.PSObject.Properties | Select-Object -First 1).Value
+        $langs = ($cj.languages -join ", ")
+        $marker = if ($cj.content_warning) { " [!]" } else { "" }
+        "{0,2}. {1,-12} {2} [{3}]{4}" -f ($i+1), $dirs[$i].Name, $name, $langs, $marker | Write-Host
+        $items += $dirs[$i].Name
+    }
+    while ($true) {
+        $raw = Read-Host "Select character [1-$($items.Count)]"
+        if ($raw -match '^\d+$' -and [int]$raw -ge 1 -and [int]$raw -le $items.Count) {
+            return $items[[int]$raw - 1]
+        }
+    }
+}
+
+function Select-Language($char) {
+    if ($char.languages.Count -eq 1) { return $char.languages[0] }
+    Write-Host ""
+    Write-Host "Available languages for $($Character):"
+    for ($i = 0; $i -lt $char.languages.Count; $i++) {
+        "  {0}. {1}" -f ($i+1), $char.languages[$i] | Write-Host
+    }
+    while ($true) {
+        $raw = Read-Host "Select language [1-$($char.languages.Count)]"
+        if ($raw -match '^\d+$' -and [int]$raw -ge 1 -and [int]$raw -le $char.languages.Count) {
+            return $char.languages[[int]$raw - 1]
+        }
+    }
+}
+
 function Invoke-Install {
+    if ([string]::IsNullOrEmpty($Character)) {
+        $script:Character = Select-Character
+    }
     $charJson = Join-Path $Repo "characters\$Character\character.json"
     if (-not (Test-Path $charJson)) {
         Write-Host "ERROR: unknown character '$Character'. Available:" -ForegroundColor Red
@@ -46,7 +85,7 @@ function Invoke-Install {
     $char = Get-Content $charJson -Raw | ConvertFrom-Json
 
     if ([string]::IsNullOrEmpty($Language)) {
-        $Language = $char.default_language
+        $script:Language = Select-Language $char
     }
     $langDir = Join-Path $Repo "characters\$Character\$Language"
     if (-not (Test-Path $langDir)) {

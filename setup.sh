@@ -10,7 +10,7 @@
 set -euo pipefail
 
 ACTION="install"
-CHAR="sahib"
+CHAR=""
 LANG=""
 
 while [[ $# -gt 0 ]]; do
@@ -43,8 +43,53 @@ need_jq() {
 }
 
 # ── Install ───────────────────────────────────────────────────────────────────
+pick_character() {
+  local chars=() i=1
+  echo ""
+  echo "Available characters:"
+  for d in "$REPO"/characters/*/; do
+    local id name langs warn marker
+    id="$(basename "$d")"
+    name="$(jq -r '.name | to_entries[0].value' "$d/character.json")"
+    langs="$(jq -r '.languages | join(", ")' "$d/character.json")"
+    warn="$(jq -r '.content_warning // empty' "$d/character.json")"
+    marker=""; [[ -n "$warn" ]] && marker=" [!]"
+    printf "  %d. %-12s %s [%s]%s\n" "$i" "$id" "$name" "$langs" "$marker"
+    chars+=("$id"); i=$((i+1))
+  done
+  while :; do
+    read -r -p "Select character [1-${#chars[@]}]: " choice
+    if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#chars[@]} )); then
+      CHAR="${chars[$((choice-1))]}"; return
+    fi
+  done
+}
+
+pick_language() {
+  local langs=() i=1
+  while IFS= read -r l; do langs+=("$l"); done < <(jq -r '.languages[]' "$CHAR_JSON")
+  if (( ${#langs[@]} == 1 )); then
+    LANG="${langs[0]}"; return
+  fi
+  echo ""
+  echo "Available languages for $CHAR:"
+  for l in "${langs[@]}"; do
+    printf "  %d. %s\n" "$i" "$l"; i=$((i+1))
+  done
+  while :; do
+    read -r -p "Select language [1-${#langs[@]}]: " choice
+    if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#langs[@]} )); then
+      LANG="${langs[$((choice-1))]}"; return
+    fi
+  done
+}
+
 do_install() {
   need_jq
+
+  if [[ -z "$CHAR" ]]; then
+    pick_character
+  fi
 
   CHAR_JSON="$REPO/characters/$CHAR/character.json"
   if [[ ! -f "$CHAR_JSON" ]]; then
@@ -54,7 +99,7 @@ do_install() {
   fi
 
   if [[ -z "$LANG" ]]; then
-    LANG="$(jq -r '.default_language' "$CHAR_JSON")"
+    pick_language
   fi
   LANG_DIR="$REPO/characters/$CHAR/$LANG"
   if [[ ! -d "$LANG_DIR" ]]; then

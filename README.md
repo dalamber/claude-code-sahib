@@ -34,8 +34,8 @@
 ```bash
 git clone https://github.com/dalamber/claude-code-sahib
 cd claude-code-sahib
-bash setup.sh                                            # sahib/en (default)
-bash setup.sh --character butler --language en
+bash setup.sh                                            # interactive: pick character + language
+bash setup.sh --character butler --language en           # non-interactive
 bash setup.sh --character gopnik --language ru           # prompts on content warning
 bash setup.sh --uninstall
 ```
@@ -45,8 +45,8 @@ bash setup.sh --uninstall
 ```powershell
 git clone https://github.com/dalamber/claude-code-sahib
 cd claude-code-sahib
-powershell -ExecutionPolicy Bypass -File setup.ps1
-powershell -ExecutionPolicy Bypass -File setup.ps1 -Character butler -Language en
+powershell -ExecutionPolicy Bypass -File setup.ps1                                  # interactive
+powershell -ExecutionPolicy Bypass -File setup.ps1 -Character butler -Language en   # non-interactive
 powershell -ExecutionPolicy Bypass -File setup.ps1 -Uninstall
 ```
 
