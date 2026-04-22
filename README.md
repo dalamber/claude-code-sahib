@@ -27,7 +27,7 @@ Hooks into Claude Code's event system to play a random voice line whenever somet
 **macOS / Linux**
 
 ```bash
-git clone https://github.com/antonshpak/claude-code-sahib
+git clone https://github.com/dalamber/claude-code-sahib
 cd claude-code-sahib
 bash setup.sh
 ```
@@ -37,7 +37,7 @@ Requires `jq` for hook wiring (`brew install jq` / `apt install jq`). Idempotent
 **Windows (PowerShell)**
 
 ```powershell
-git clone https://github.com/antonshpak/claude-code-sahib
+git clone https://github.com/dalamber/claude-code-sahib
 cd claude-code-sahib
 powershell -ExecutionPolicy Bypass -File setup.ps1
 ```
