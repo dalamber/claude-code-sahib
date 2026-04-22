@@ -38,7 +38,7 @@ function Write-Settings($cfg) {
 
 function Select-Character {
     Write-Host ""
-    Write-Host "Available characters:"
+    Write-Host "What would you like to do?"
     $dirs = Get-ChildItem (Join-Path $Repo "characters") -Directory | Sort-Object Name
     $items = @()
     for ($i = 0; $i -lt $dirs.Count; $i++) {
@@ -46,13 +46,17 @@ function Select-Character {
         $name = ($cj.name.PSObject.Properties | Select-Object -First 1).Value
         $langs = ($cj.languages -join ", ")
         $marker = if ($cj.content_warning) { " [!]" } else { "" }
-        "{0,2}. {1,-12} {2} [{3}]{4}" -f ($i+1), $dirs[$i].Name, $name, $langs, $marker | Write-Host
+        "{0,2}. Install {1,-12} {2} [{3}]{4}" -f ($i+1), $dirs[$i].Name, $name, $langs, $marker | Write-Host
         $items += $dirs[$i].Name
     }
+    $uninstallIdx = $items.Count + 1
+    "{0,2}. Uninstall" -f $uninstallIdx | Write-Host
     while ($true) {
-        $raw = Read-Host "Select character [1-$($items.Count)]"
-        if ($raw -match '^\d+$' -and [int]$raw -ge 1 -and [int]$raw -le $items.Count) {
-            return $items[[int]$raw - 1]
+        $raw = Read-Host "Select [1-$uninstallIdx]"
+        if ($raw -match '^\d+$') {
+            $n = [int]$raw
+            if ($n -eq $uninstallIdx) { return "__uninstall__" }
+            if ($n -ge 1 -and $n -le $items.Count) { return $items[$n - 1] }
         }
     }
 }
@@ -75,6 +79,10 @@ function Select-Language($char) {
 function Invoke-Install {
     if ([string]::IsNullOrEmpty($Character)) {
         $script:Character = Select-Character
+        if ($Character -eq "__uninstall__") {
+            Invoke-Uninstall
+            return
+        }
     }
     $charJson = Join-Path $Repo "characters\$Character\character.json"
     if (-not (Test-Path $charJson)) {

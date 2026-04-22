@@ -46,7 +46,7 @@ need_jq() {
 pick_character() {
   local chars=() i=1
   echo ""
-  echo "Available characters:"
+  echo "What would you like to do?"
   for d in "$REPO"/characters/*/; do
     local id name langs warn marker
     id="$(basename "$d")"
@@ -54,12 +54,17 @@ pick_character() {
     langs="$(jq -r '.languages | join(", ")' "$d/character.json")"
     warn="$(jq -r '.content_warning // empty' "$d/character.json")"
     marker=""; [[ -n "$warn" ]] && marker=" [!]"
-    printf "  %d. %-12s %s [%s]%s\n" "$i" "$id" "$name" "$langs" "$marker"
+    printf "  %d. Install %-12s %s [%s]%s\n" "$i" "$id" "$name" "$langs" "$marker"
     chars+=("$id"); i=$((i+1))
   done
+  printf "  %d. Uninstall\n" "$i"
+  local max=$i
   while :; do
-    read -r -p "Select character [1-${#chars[@]}]: " choice
-    if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#chars[@]} )); then
+    read -r -p "Select [1-$max]: " choice
+    if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= max )); then
+      if (( choice == max )); then
+        ACTION="uninstall"; return
+      fi
       CHAR="${chars[$((choice-1))]}"; return
     fi
   done
@@ -89,6 +94,10 @@ do_install() {
 
   if [[ -z "$CHAR" ]]; then
     pick_character
+    if [[ "$ACTION" == "uninstall" ]]; then
+      do_uninstall
+      return
+    fi
   fi
 
   CHAR_JSON="$REPO/characters/$CHAR/character.json"
